@@ -3,10 +3,10 @@ import Functions as fn
 
 
 class HiddenLayer(object):
-    def __init__(self, nodes, inputs):
-        self.weights = np.ones((nodes, inputs))
-        self.bias = np.ones((nodes, 1))
-        self.gradient = np.ones((nodes, 1))
+    def __init__(self, inputs, nodes):
+        self.weights = np.random.rand(nodes, inputs)
+        self.bias = np.random.rand(nodes, 1)
+        self.gradient = np.random.rand(nodes, 1)
 
     def forwardPropagation(self, X):
         self.signals = np.add(np.dot(self.weights, X), self.bias)

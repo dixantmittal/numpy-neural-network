@@ -1,38 +1,24 @@
-import OutputLayer as ol
-import HiddenLayer as hl
+import NeuralNetwork as nn
 import numpy as np
-from sklearn import datasets as dt
-import random
 import AccuracyTest as at
 
-samples = 200
-Data, Y = dt.make_classification(n_samples=samples, n_features=2, n_redundant=0)
-msk = np.random.rand(len(Data)) < 0.75
+# samples = 1000
+# Data, Y = dt.make_classification(n_samples=samples, n_features=2, n_redundant=0)
+# msk = np.random.rand(len(Data)) < 0.75
+#
+# trainData = Data[msk]
+# testData = Data[~msk]
+# trainY = Y[msk]
+# testY = Y[~msk]
 
-trainData = Data[msk]
-testData = Data[~msk]
-trainY = Y[msk]
-testY = Y[~msk]
+trainData = np.load("/Users/dixantmittal/Downloads/TrainingData.npy")
+testData = np.load("/Users/dixantmittal/Downloads/TestingData.npy")
+trainY = np.load("/Users/dixantmittal/Downloads/TrainingY.npy")
+testY = np.load("/Users/dixantmittal/Downloads/TestingY.npy")
 
-print("Split: ", len(trainData))
+network = nn.NeuralNetwork(2, [3, 3, 3])
+network.train(trainingX=trainData, trainingY=trainY, epoch=10000000, learningRate=0.03)
+output = network.test(testData)
 
-HL1 = hl.HiddenLayer(2, 2)
-OL = ol.OutputLayer(2)
-
-for i in range(0, 10000):
-    n = random.randint(0, len(trainData) - 1)
-    X = np.asmatrix(trainData[n, :]).transpose()
-
-    HL1.forwardPropagation(X)
-    OL.forwardPropagation(HL1.activations)
-
-    OL.backwardPropagation(trainY[n])
-    HL1.backwardPropagation(OL)
-
-    HL1.adjustWeights(0.3, X)
-    OL.adjustWeights(0.3, HL1.activations)
-
-print(HL1.weights)
-print(OL.weights)
-
-at.getAccuracy(testData, testY, HL1, OL)
+print("Train Accuracy: ", at.getAccuracy(network.test(trainData), trainY))
+print("Test Accuracy: ", at.getAccuracy(output, testY))
