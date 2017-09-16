@@ -6,12 +6,12 @@ import numpy as np
 class NeuralNetwork(object):
     isTrained = False
 
-    def __init__(self, numberOfInputs, hiddenLayersNodes):
+    def __init__(self, numberOfInputFeatures, hiddenLayersNodesMetadata):
         self.layers = []
-        inputs = numberOfInputs
-        for i in range(0, len(hiddenLayersNodes)):
-            self.layers.append(hidden.HiddenLayer(inputs, hiddenLayersNodes[i]))
-            inputs = hiddenLayersNodes[i]
+        inputs = numberOfInputFeatures
+        for i in range(0, len(hiddenLayersNodesMetadata)):
+            self.layers.append(hidden.HiddenLayer(inputs=inputs, nodes=hiddenLayersNodesMetadata[i]))
+            inputs = hiddenLayersNodesMetadata[i]
 
         self.layers.append(out.OutputLayer(inputs=inputs))
 
