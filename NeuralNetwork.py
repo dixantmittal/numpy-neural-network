@@ -48,12 +48,16 @@ class NeuralNetwork(object):
             print("Network not trained!")
             return
 
-        testY = []
+        predictions = []
         for i in range(0, len(testX)):
             X = np.asmatrix(testX[i, :]).transpose()
             for hl in self.layers:
                 hl.forwardPropagation(X)
                 X = hl.activations
-            testY.append(X)
 
-        return testY
+            if X > 0.5:
+                X = 1
+            else:
+                X = 0
+            predictions.append(X)
+        return predictions
