@@ -1,22 +1,26 @@
 import numpy as np
-import Functions as fn
 
 
 class HiddenLayer(object):
-    def __init__(self, inputs, nodes):
-        self.weights = np.random.rand(nodes, inputs)
-        self.bias = np.random.rand(nodes, 1)
-        self.gradient = np.random.rand(nodes, 1)
+    def __init__(self, inputSize, layerSize, regularizationRate, learningRate):
+        self.weights = 0.01 * np.random.randn(inputSize, layerSize)
+        self.bias = np.zeros((1, layerSize))
+        self.reg = regularizationRate
+        self.learningRate = learningRate
 
     def forwardPropagation(self, X):
-        self.signals = np.add(np.dot(self.weights, X), self.bias)
-        self.activations = fn.sigmoid(self.signals)
+        self.signals = np.dot(X, self.weights) + self.bias
+        self.activations = np.maximum(0, self.signals)
+        return self.activations
 
     def backwardPropagation(self, nextLayer):
-        self.gradient = np.multiply(np.dot(nextLayer.weights.transpose(), nextLayer.gradient), self.selfGradient())
+        self.gradient = np.dot(nextLayer.gradient, nextLayer.weights.T)
+        self.gradient[self.activations <= 0] = 0
 
-    def selfGradient(self):
-        return np.multiply(1.0 - self.activations, self.activations)
+    def adjustWeights(self, X):
+        self.dweights = np.dot(X.T, self.gradient)
+        self.dbias = np.sum(self.gradient, axis=0, keepdims=True)
+        self.dweights += self.reg * self.weights
 
-    def adjustWeights(self, alpha, X):
-        self.weights = self.weights - alpha * np.dot(self.gradient, X.transpose())
+        self.weights = self.weights - self.learningRate * self.dweights
+        self.bias = self.bias - self.learningRate * self.dbias

@@ -1,63 +1,81 @@
+import numpy as np
+
 import HiddenLayer as hidden
 import OutputLayer as out
-import numpy as np
 
 
 class NeuralNetwork(object):
-    isTrained = False
+    def __init__(self, classSize, hiddenLayersSizes, batchSize, learningRate, regularizationRate):
+        self.hiddenLayersSizes = hiddenLayersSizes
+        self.batchSize = batchSize
+        self.learningRate = learningRate
+        self.regularizationRate = regularizationRate
+        self.classSize = classSize
 
-    def __init__(self, numberOfInputFeatures, hiddenLayersNodesMetadata):
-        self.layers = []
-        inputs = numberOfInputFeatures
-        for i in range(0, len(hiddenLayersNodesMetadata)):
-            self.layers.append(hidden.HiddenLayer(inputs=inputs, nodes=hiddenLayersNodesMetadata[i]))
-            inputs = hiddenLayersNodesMetadata[i]
+    def initLayers(self, inputSize):
+        self.hiddenLayers = []
+        for i in self.hiddenLayersSizes:
+            self.hiddenLayers.append(
+                hidden.HiddenLayer(inputSize=inputSize, layerSize=i,
+                                   regularizationRate=self.regularizationRate,
+                                   learningRate=self.learningRate))
+            inputSize = i
 
-        self.layers.append(out.OutputLayer(inputs=inputs))
+        self.outputLayer = out.OutputLayer(inputSize=inputSize, classSize=self.classSize,
+                                           regularizationRate=self.regularizationRate,
+                                           learningRate=self.learningRate)
 
-    def train(self, trainingX, trainingY, epoch, learningRate):
+    def train(self, X_train, Y_train, epoch):
+
+        self.initLayers(len(X_train[0]))
+
+        # init prev loss to a big number
+        prevloss = 10000
+
+        # forward propagate and calculate score
         i = 0
-        while True:
-            j = 0
-            for j in range(0, len(trainingX)):
+        for i in range(epoch):
 
-                X = np.asmatrix(trainingX[j, :]).transpose()
-                for hl in self.layers:
-                    hl.forwardPropagation(X)
-                    X = hl.activations
+            msk = np.random.rand(len(X_train)) < (self.batchSize / len(X_train))
+            X = X_train[msk]
+            for hl in self.hiddenLayers:
+                X = hl.forwardPropagation(X)
 
-                expected = trainingY[j]
-                for hl in reversed(self.layers):
-                    hl.backwardPropagation(expected)
-                    expected = hl
+            self.outputLayer.forwardPropagation(X)
 
-                X = np.asmatrix(trainingX[j, :]).transpose()
-                for hl in self.layers:
-                    hl.adjustWeights(learningRate, X)
-                    X = hl.activations
-            i += j
-            if i > epoch:
+            loss = self.outputLayer.calculateLoss(Y=Y_train[msk])
+            print(loss)
+
+            if abs(prevloss - loss) < 0.00000001:
+                print(i)
                 break
+            prevloss = loss
 
-        for hl in self.layers:
-            print(hl.weights)
-        self.isTrained = True
+            self.outputLayer.backwardPropagation(Y_train[msk])
 
-    def test(self, testX):
-        if self.isTrained != True:
-            print("Network not trained!")
-            return
+            nextLayer = self.outputLayer
+            for hl in reversed(self.hiddenLayers):
+                hl.backwardPropagation(nextLayer)
+                nextLayer = hl
 
-        predictions = []
-        for i in range(0, len(testX)):
-            X = np.asmatrix(testX[i, :]).transpose()
-            for hl in self.layers:
-                hl.forwardPropagation(X)
+            X = X_train[msk]
+            for hl in self.hiddenLayers:
+                hl.adjustWeights(X)
                 X = hl.activations
 
-            if X > 0.5:
-                X = 1
-            else:
-                X = 0
-            predictions.append(X)
-        return predictions
+            self.outputLayer.adjustWeights(X)
+
+        if (i + 1 == epoch):
+            print("epoch reached and network has not converged yet")
+
+    def predict(self, testX):
+        X = testX
+        for hl in self.hiddenLayers:
+            hl.forwardPropagation(X)
+            X = hl.activations
+
+        predictedClass = self.outputLayer.forwardPropagation(X=X)
+        return predictedClass
+
+    def calculateLoss(self, Y):
+        self.outputLayer.calculateLoss(Y)
