@@ -45,7 +45,8 @@ class NeuralNetwork(object):
             self.outputLayer.forwardPropagation(X)
 
             loss = self.outputLayer.calculateLoss(Y=Y_batch)
-            self.loss.append(loss)
+            if len(self.loss) == 0 or loss < self.loss[len(self.loss) - 1]:
+                self.loss.append(loss)
 
             self.outputLayer.backwardPropagation(Y=Y_batch)
 
