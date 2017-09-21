@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import numpy as np
 
 import NeuralNetwork as nn
@@ -56,16 +57,16 @@ X_test = np.genfromtxt('/Users/dixantmittal/Downloads/assignment1/Question2_123/
 Y_test = np.genfromtxt('/Users/dixantmittal/Downloads/assignment1/Question2_123/y_test.csv', delimiter=',', dtype=int)
 
 # # Neural net with 2 hidden layers [100,40]
-# network = nn.NeuralNetwork(classSize=4, hiddenLayersSizes=[100, 40], batchSize=128, learningRate=1e-1,
-#                            regularizationRate=1e-4)
-#
-# network.train(X_train=X_train, Y_train=Y_train, epoch=10000)
+network = nn.NeuralNetwork(classSize=4, hiddenLayersSizes=[100, 40], batchSize=128, learningRate=1e-1,
+                           regularizationRate=1e-3)
+
+network.train(X_train=X_train, Y_train=Y_train, maxIterations=10000)
 
 # Neural net with 2 hidden layers [28,28,28,28,28,28]
-network = nn.NeuralNetwork(classSize=4, hiddenLayersSizes=[28, 28, 28, 28, 28, 28], batchSize=128, learningRate=1e0,
-                           regularizationRate=0)
-
-network.train(X_train=X_train, Y_train=Y_train, epoch=10000)
+# network = nn.NeuralNetwork(classSize=4, hiddenLayersSizes=[28, 28, 28, 28, 28, 28], batchSize=128, learningRate=1e0,
+#                            regularizationRate=0)
+#
+# network.train(X_train=X_train, Y_train=Y_train, maxIterations=30000)
 
 # network = nn.NeuralNetwork(classSize=4,
 #                            hiddenLayersSizes=[14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14,
@@ -73,6 +74,11 @@ network.train(X_train=X_train, Y_train=Y_train, epoch=10000)
 #                            regularizationRate=0)
 #
 # network.train(X_train=X_train, Y_train=Y_train, epoch=5000)
+
+plt.plot(range(len(network.loss)), network.loss)
+plt.xlabel("Iterations")
+plt.ylabel("logLoss")
+# plt.show()
 
 print('training accuracy: %.2f' % (np.mean(network.predict(X_train) == Y_train) * 100))
 print('validation accuracy: %.2f' % (np.mean(network.predict(X_validate) == Y_validate) * 100))

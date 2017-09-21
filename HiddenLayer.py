@@ -3,7 +3,7 @@ import numpy as np
 
 class HiddenLayer(object):
     def __init__(self, inputSize, layerSize, regularizationRate, learningRate):
-        self.weights = 0.01 * np.random.randn(inputSize, layerSize)
+        self.weights = 0.1 * np.random.randn(inputSize, layerSize)
         self.bias = np.zeros((1, layerSize))
         self.reg = regularizationRate
         self.learningRate = learningRate
