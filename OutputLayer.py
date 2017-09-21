@@ -3,7 +3,7 @@ import numpy as np
 
 class OutputLayer(object):
     def __init__(self, inputSize, classSize, regularizationRate, learningRate):
-        self.weights = 0.1 * np.random.randn(inputSize, classSize).astype(np.float64)
+        self.weights = np.random.randn(inputSize, classSize).astype(np.float64)
         self.bias = np.zeros((1, classSize))
         self.reg = regularizationRate
         self.learningRate = learningRate
