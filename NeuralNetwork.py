@@ -1,17 +1,23 @@
+import numpy as np
+
 import HiddenLayer as hidden
 import OutputLayer as out
 
 
 class NeuralNetwork(object):
-    def __init__(self, classSize, hiddenLayersSizes, batchSize, learningRate, regularizationRate):
+    def __init__(self, classSize, hiddenLayersSizes, batchSize, learningRate, regularizationRate, metricsRate=10):
         self.hiddenLayersSizes = hiddenLayersSizes
         self.batchSize = batchSize
         self.learningRate = learningRate
         self.regularizationRate = regularizationRate
         self.classSize = classSize
-        self.loss = []
+        self.trainingLoss = []
+        self.testingLoss = []
+        self.trainingAccuracy = []
+        self.testingAccuracy = []
         self.start = 0
         self.end = 0
+        self.metricsRate = metricsRate
 
     def initLayers(self, inputSize):
         self.hiddenLayers = []
@@ -26,7 +32,7 @@ class NeuralNetwork(object):
                                            regularizationRate=self.regularizationRate,
                                            learningRate=self.learningRate)
 
-    def train(self, X_train, Y_train, maxIterations):
+    def train(self, X_train, Y_train, X_test, Y_test, maxIterations):
 
         n_samples, n_features = X_train.shape
 
@@ -44,8 +50,9 @@ class NeuralNetwork(object):
 
             self.outputLayer.forwardPropagation(X)
 
-            loss = self.outputLayer.calculateLoss(Y=Y_batch)
-            self.loss.append(loss)
+            # calculating training loss
+            if i % self.metricsRate == 0:
+                self.trainingLoss.append(self.outputLayer.calculateLoss(Y=Y_batch))
 
             self.outputLayer.backwardPropagation(Y=Y_batch)
 
@@ -61,16 +68,32 @@ class NeuralNetwork(object):
 
             self.outputLayer.adjustWeights(X)
 
-            if (i + 1) % (maxIterations / 10) == 0:
-                print(int((i + 1) * 100 / maxIterations), "% complete")
-                # plt.plot(range(len(self.loss)), self.loss, "ro")
-                # plt.xlabel("Iterations"   )
-                # plt.ylabel("logLoss")
-                # plt.show()
             i += 1
+            if i % (maxIterations / 10) == 0:
+                print(int(i * 100 / maxIterations), "% complete")
+
+            if i % self.metricsRate == 0:
+                # calculating training accuracy
+                self.calculateAccuracy(self.trainingAccuracy, X_batch, Y_batch)
+
+                # calculating testing loss
+                self.calculateLoss(self.testingLoss, X_test, Y_test)
+
+                # calculating testing accuracy
+                self.calculateAccuracy(self.testingAccuracy, X_test, Y_test)
 
         if (i + 1 == maxIterations):
             print("epoch reached and network has not converged yet")
+
+    def calculateAccuracy(self, history, X_test, Y_test):
+        history.append(np.mean(self.predict(X_test) == Y_test) * 100)
+
+    def calculateLoss(self, loss, X_test, Y_test):
+        X = X_test
+        for hl in self.hiddenLayers:
+            X = hl.forwardPropagation(X)
+        self.outputLayer.forwardPropagation(X)
+        loss.append(self.outputLayer.calculateLoss(Y=Y_test))
 
     def predict(self, testX):
         X = testX
@@ -80,9 +103,6 @@ class NeuralNetwork(object):
 
         predictedClass = self.outputLayer.forwardPropagation(X=X)
         return predictedClass
-
-    def calculateLoss(self, Y):
-        self.outputLayer.calculateLoss(Y)
 
     def getBatch(self, X_train, Y_train, batchSize):
         n_samples = len(X_train)
