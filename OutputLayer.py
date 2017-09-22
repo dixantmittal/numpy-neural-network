@@ -33,6 +33,6 @@ class OutputLayer(object):
         # number of examples
         n = len(self.probability)
 
-        logProbability = -self.score[range(n), Y] + np.log(np.sum(self.exp_score, axis=1, keepdims=True))
-        loss = (np.sum(logProbability) / n + 0.5 * self.reg * np.sum(self.weights * self.weights)).astype(np.int64)
+        logProbability = (-self.score + np.log(np.sum(self.exp_score, axis=1, keepdims=True)))[range(n), Y]
+        loss = np.sum(logProbability) / n + 0.5 * self.reg * np.sum(self.weights * self.weights)
         return loss

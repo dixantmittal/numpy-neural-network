@@ -1,5 +1,3 @@
-import numpy as np
-
 import HiddenLayer as hidden
 import OutputLayer as out
 
@@ -47,10 +45,7 @@ class NeuralNetwork(object):
             self.outputLayer.forwardPropagation(X)
 
             loss = self.outputLayer.calculateLoss(Y=Y_batch)
-            if len(self.loss) == 0:
-                self.loss.append(loss)
-            else:
-                self.loss.append(np.minimum(loss, self.loss[len(self.loss) - 1]))
+            self.loss.append(loss)
 
             self.outputLayer.backwardPropagation(Y=Y_batch)
 
@@ -66,8 +61,8 @@ class NeuralNetwork(object):
 
             self.outputLayer.adjustWeights(X)
 
-            if i != 0 and i % (maxIterations / 10) == 0:
-                print(i * 100 / maxIterations, "% complete")
+            if (i + 1) % (maxIterations / 10) == 0:
+                print(int((i + 1) * 100 / maxIterations), "% complete")
                 # plt.plot(range(len(self.loss)), self.loss, "ro")
                 # plt.xlabel("Iterations"   )
                 # plt.ylabel("logLoss")
