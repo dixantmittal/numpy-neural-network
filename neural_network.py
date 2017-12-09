@@ -29,7 +29,8 @@ class NeuralNetwork(object):
         n_iterations = epochs * n_samples // batch_size
 
         # reset adam params
-        m_w, v_w, m_b, v_b = {}, {}, {}, {}
+        if optimizer == 'adam':
+            m_w, v_w, m_b, v_b = {}, {}, {}, {}
 
         for iteration in tqdm(range(n_iterations)):
 
@@ -46,7 +47,7 @@ class NeuralNetwork(object):
             score, cache[self.n_layers - 1] = affine_forward(h, self.weights[self.n_layers - 1],
                                                              self.bias[self.n_layers - 1])
 
-            # calculate score
+            # calculate loss
             loss, dout = softmax_loss(score, y_batch)
 
             # Backpropagation
