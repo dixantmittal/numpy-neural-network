@@ -5,11 +5,10 @@ from layers import *
 
 
 class NeuralNetwork(object):
-    def __init__(self, n_features, n_classes, architecture, dropout=0):
+    def __init__(self, n_features, n_classes, architecture):
         self.n_features = n_features
         self.n_classes = n_classes
         self.architecture = architecture
-        self.dropout = dropout
         self.n_layers = len(architecture) + 1
 
         # initialize weights map
@@ -18,7 +17,7 @@ class NeuralNetwork(object):
         # metrics
         self.training_loss = []
 
-    def train(self, X, y, epochs=10, alpha=3e-3, delta=1e-4, batch_size=128, optimizer='adam',
+    def train(self, X, y, epochs=10, alpha=3e-3, batch_size=128, delta=1e-4, optimizer='adam',
               optimizer_params={'beta1': 0.9, 'beta2': 0.999}, verbose=True):
 
         X_train, y_train, X_dev, y_dev = split_data(X, y)

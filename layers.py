@@ -41,6 +41,21 @@ def affine_backward(dout, cache):
     return dx, dW, db
 
 
+def dropout_forward(X, dropout):
+    # find dropout masks
+    p = np.random.rand(*X.shape) < (1 - dropout)
+
+    # turn masked values off
+    a = X * p / (1 - dropout)
+    return a, (X, p, dropout)
+
+
+def dropout_backward(dout, cache):
+    X, p, dropout = cache
+    dx = dout * p * (1 - dropout)
+    return dx
+
+
 def softmax_loss(score, y):
     n_samples = len(y)
     shifted_score = score - np.max(score, axis=1, keepdims=True)
