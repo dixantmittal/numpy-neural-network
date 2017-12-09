@@ -19,8 +19,7 @@ class NeuralNetwork(object):
         self.training_loss = []
 
     def train(self, X, y, epochs=10, alpha=3e-3, delta=1e-4, batch_size=128, optimizer='adam',
-              optimizer_params={'beta1': 0.9, 'beta2': 0.999},
-              verbose=True):
+              optimizer_params={'beta1': 0.9, 'beta2': 0.999}, verbose=True):
 
         X_train, y_train, X_dev, y_dev = split_data(X, y)
         n_samples, n_features = X_train.shape
@@ -58,9 +57,8 @@ class NeuralNetwork(object):
 
             # adjust weights
             for step in range(self.n_layers - 1):
-
+                # Adaptive Momentum (ADAM)
                 if optimizer == 'adam':
-                    # adam optimizer
                     m_w[step] = m_w.get(step, 0) * optimizer_params['beta1'] + (1 - optimizer_params['beta1']) * dW[
                         step]
                     m_b[step] = m_b.get(step, 0) * optimizer_params['beta1'] + (1 - optimizer_params['beta1']) * db[
@@ -71,11 +69,13 @@ class NeuralNetwork(object):
                     v_b[step] = v_b.get(step, 0) * optimizer_params['beta2'] + (1 - optimizer_params['beta2']) * (
                         db[step] ** 2)
 
-                    self.weights[step] = self.weights[step] - alpha * m_w[step] / (np.sqrt(v_w[step]) + 1e-10)
+                    self.weights[step] = self.weights[step] - alpha * m_w[step] / (
+                        np.sqrt(v_w[step]) + 1e-10) - delta * self.weights[step]
                     self.bias[step] = self.bias[step] - alpha * m_b[step] / (np.sqrt(v_b[step]) + 1e-10)
 
+                # Stochastic Gradient Descent
                 elif optimizer == 'sgd':
-                    self.weights[step] = self.weights[step] - alpha * dW[step]
+                    self.weights[step] = self.weights[step] - alpha * dW[step] - delta * self.weights[step]
                     self.bias[step] = self.bias[step] - alpha * db[step]
                 else:
                     print('invalid optimizer')
@@ -101,6 +101,7 @@ class NeuralNetwork(object):
         score, _ = affine_forward(h, self.weights[self.n_layers - 1],
                                   self.bias[self.n_layers - 1])
 
+        # find labels
         label = np.argmax(score, axis=1)
 
         return label
