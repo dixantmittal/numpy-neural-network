@@ -1,5 +1,5 @@
-# Vanilla Neural Network
-This project implements the neural network from scratch. 
+# Numpy Neural Network
+This project implements the neural network using numpy. 
 After reading CS231n, it was initially made to test the understanding of Backpropagation.
 Later, I started adding more stuff into it such as adam optimizer. 
 Code structure is simple and written in an understandable manner.
